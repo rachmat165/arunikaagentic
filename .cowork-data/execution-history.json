@@ -1,0 +1,37 @@
+{
+  "social-media-daily": [
+    {
+      "taskId": "task-001",
+      "workflowId": "social-media-daily",
+      "instanceId": "sales-marketing",
+      "status": "completed",
+      "startTime": "2026-05-10T11:20:03.687Z",
+      "endTime": "2026-05-10T11:25:03.687Z",
+      "duration": 300000,
+      "outputs": {
+        "posts": 3,
+        "platforms": [
+          "LinkedIn",
+          "Instagram",
+          "Twitter"
+        ],
+        "engagement": "High"
+      }
+    }
+  ],
+  "daily-briefing": [
+    {
+      "taskId": "task-002",
+      "workflowId": "daily-briefing",
+      "instanceId": "central-hub",
+      "status": "completed",
+      "startTime": "2026-05-10T10:20:03.687Z",
+      "endTime": "2026-05-10T10:25:03.687Z",
+      "duration": 300000,
+      "outputs": {
+        "summary": "Daily briefing generated",
+        "metrics": "Updated"
+      }
+    }
+  ]
+}

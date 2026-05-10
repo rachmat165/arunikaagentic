@@ -49,3 +49,12 @@ Thumbs.db
 # Cache
 .cache/
 .eslintcache
+config/gcp-gmail-sa.json 
+config/gcp-service-account.json 
+config/api-keys.json 
+config/gcp-gmail-sa.json 
+config/gcp-service-account.json 
+config/api-keys.json 
+config/gcp-gmail-sa.json 
+config/gcp-service-account.json 
+config/api-keys.json 
