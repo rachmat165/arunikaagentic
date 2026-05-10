@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard,
   BarChart3,
   CheckSquare,
   DollarSign,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react'
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/', badge: null },
   { icon: BarChart3, label: 'Executive Summary', href: '/summary', badge: null },
   { icon: CheckSquare, label: 'To-Do Lists', href: '/todos', badge: 'New' },
   { icon: DollarSign, label: 'Costs & Budget', href: '/costs', badge: null },
