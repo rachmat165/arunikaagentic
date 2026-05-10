@@ -211,4 +211,36 @@ export default function AnalyticsPage() {
             <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
               <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">⏳ Awaiting Execution Data</p>
               <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
-                
+                No executions recorded yet. Start running scheduled tasks to populate this dashboard with real data.
+              </p>
+            </div>
+          ) : (
+            <>
+              {stats.successRate >= 95 ? (
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                  <p className="text-sm font-semibold text-green-900 dark:text-green-100">✓ Excellent Reliability</p>
+                  <p className="text-sm text-green-800 dark:text-green-200 mt-1">
+                    System success rate is {stats.successRate.toFixed(1)}%. All Cowork instances operating normally.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+                  <p className="text-sm font-semibold text-red-900 dark:text-red-100">⚠️ Review Needed</p>
+                  <p className="text-sm text-red-800 dark:text-red-200 mt-1">
+                    Success rate is {stats.successRate.toFixed(1)}%. Check execution logs for failures.
+                  </p>
+                </div>
+              )}
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">📊 Execution Activity</p>
+                <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+                  {stats.totalExecutions} total executions across 4 Cowork instances. Average execution time: {stats.avgExecutionTime}ms.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </DashboardCard>
+    </div>
+  )
+}

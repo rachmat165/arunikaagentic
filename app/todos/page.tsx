@@ -259,4 +259,15 @@ export default function TodosPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <p className="text-gray-600 dark:text-gray-400">Completed This Week</p>
-              <p className="text-xl 
+              <p className="text-xl font-bold text-green-600 dark:text-green-400">{completedCount}</p>
+            </div>
+            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <p className="text-gray-600 dark:text-gray-400">Due This Week</p>
+              <p className="text-xl font-bold text-orange-600 dark:text-orange-400">{pendingCount}</p>
+            </div>
+          </div>
+        </div>
+      </DashboardCard>
+    </div>
+  )
+}

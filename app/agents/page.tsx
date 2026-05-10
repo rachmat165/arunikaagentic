@@ -290,4 +290,28 @@ export default function AgentsPage() {
                   </div>
                 </div>
               ))}
-        
+          </div>
+        </DashboardCard>
+
+        <DashboardCard title="📈 Success Rates">
+          <div className="space-y-3">
+            {sortedAgents
+              .sort((a, b) => b.successRate - a.successRate)
+              .slice(0, 5)
+              .map((agent) => (
+                <div
+                  key={agent.id}
+                  className="flex justify-between items-center p-3 bg-gray-50 dark:bg-dark-800 rounded"
+                >
+                  <span className="text-sm font-medium">{agent.name}</span>
+                  <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                    {agent.successRate}%
+                  </span>
+                </div>
+              ))}
+          </div>
+        </DashboardCard>
+      </div>
+    </div>
+  )
+}

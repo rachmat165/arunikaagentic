@@ -227,4 +227,27 @@ export default function CostsPage() {
 
       {/* Recommendations */}
       <DashboardCard title="💡 Cost Optimization Recommendations">
-        <div className
+        <div className="space-y-3">
+          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+            <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">API Call Optimization</h4>
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              Consider caching responses to reduce API calls by 15-20%
+            </p>
+          </div>
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">Resource Right-Sizing</h4>
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              Your compute resources may be over-provisioned. Consider scaling down during off-peak hours.
+            </p>
+          </div>
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+            <h4 className="font-semibold text-green-900 dark:text-green-100 mb-1">Storage Cleanup</h4>
+            <p className="text-sm text-green-800 dark:text-green-200">
+              Archive old execution logs to reduce storage costs
+            </p>
+          </div>
+        </div>
+      </DashboardCard>
+    </div>
+  )
+}

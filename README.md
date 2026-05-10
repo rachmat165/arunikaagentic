@@ -191,4 +191,41 @@ docker run -p 3000:3000 arunika-dashboard
 ## 🔒 Security
 
 - Environment variables for API keys (create `.env.local`)
-- CORS heade
+- CORS headers for API requests
+- Input validation on forms
+- XSS protection through React
+
+## 📈 Performance Optimization
+
+- Image optimization with Next.js
+- Code splitting and lazy loading
+- Memoized components to prevent re-renders
+- CSS-in-JS with Tailwind for smaller bundle size
+
+## 🐛 Troubleshooting
+
+### Issue: 3D Chart not rendering
+
+**Solution:** Ensure WebGL is enabled in your browser and hardware acceleration is turned on.
+
+### Issue: Theme not persisting
+
+**Solution:** Check that localStorage is not disabled in browser settings.
+
+### Issue: High memory usage
+
+**Solution:** Three.js canvas uses GPU memory. Close other applications and restart the browser if needed.
+
+## 📞 Support
+
+For issues or questions, contact: corsec@arunika2045.com
+
+## 📝 License
+
+© 2026 PT. Arunika Teknologi Global. All rights reserved.
+
+---
+
+**Last Updated:** May 2026
+**Version:** 1.0.0
+**Status:** Production Ready ✅
