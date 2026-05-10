@@ -1,0 +1,355 @@
+===============================================================================
+ARUNIKA COWORK HYBRID - QUICK START CHECKLIST
+Untuk: IT Manager atau AI Operations Manager
+Durasi: 1 hari kerja (8 jam)
+===============================================================================
+
+PERSIAPAN (30 MENIT)
+[ ] Baca: ARUNIKA_COWORK_HYBRID_SETUP_GUIDE.md (BAGIAN 1-2)
+[ ] Siapkan: Password manager (1Password, Bitwarden, atau LastPass)
+[ ] Siapkan: 3 spreadsheet terpisah untuk tracking:
+    - API_Keys_Log.xlsx (columns: Service, Email, Key_ID, Created_Date, Owner)
+    - Setup_Progress.xlsx (tracking checklist)
+    - Budget_Tracking.xlsx (monthly costs)
+[ ] Siapkan: Email akun untuk setiap director (jika belum ada):
+    - direktur.marketing@arunika2045.com
+    - direktur.finance@arunika2045.com
+    - corsec@arunika2045.com (sudah ada)
+
+===============================================================================
+STEP 1: CREATE API KEYS (60 MENIT)
+===============================================================================
+
+CLAUDE API KEY
+[ ] Buka: https://console.anthropic.com
+[ ] Login dengan akun Anthropic Anda
+[ ] Navigasi: API Keys (menu kiri)
+[ ] Klik: "+ Create Key"
+[ ] Beri nama: "Arunika-Central-Hub"
+[ ] COPY langsung ke password manager
+[ ] Format: sk-ant-v1-xxxxxxxxxxxxx
+[ ] Log to spreadsheet: Service=Claude, Email=[akun], Key_ID=Arunika-Central-Hub
+[ ] Setup Billing: Set monthly budget ke $50
+[ ] TEST key dengan curl:
+    curl https://api.anthropic.com/v1/messages \
+    -H "x-api-key: YOUR_KEY" \
+    -H "anthropic-version: 2023-06-01" \
+    -d '{"model": "claude-3-5-sonnet-20241022", "max_tokens": 1024, "messages": [{"role": "user", "content": "Hello"}]}'
+
+OPENAI API KEY
+[ ] Buka: https://platform.openai.com
+[ ] Login dengan akun OpenAI
+[ ] Navigasi: Account menu → API keys
+[ ] Klik: "+ Create new secret key"
+[ ] Beri nama: "Arunika-Marketing-Content"
+[ ] COPY ke password manager
+[ ] Format: sk-proj-xxxxx
+[ ] Log to spreadsheet: Service=OpenAI, Email=[akun], Key_ID=Arunika-Marketing-Content
+[ ] Setup Billing: Set usage limit ke $50/month
+[ ] TEST key dengan curl:
+    curl https://api.openai.com/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_KEY" \
+    -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hello"}]}'
+
+GOOGLE GEMINI API KEY
+[ ] Buka: https://aistudio.google.com
+[ ] Login dengan Google account yang sama seperti Google Drive PT. Arunika
+[ ] Klik: "Get API key" (sidebar kiri)
+[ ] Klik: "+ Create API key"
+[ ] Pilih: "Create API key in new project" atau existing Arunika project
+[ ] COPY ke password manager
+[ ] Format: AIzaSyxxxxxxxxxxx
+[ ] Log to spreadsheet: Service=Gemini, Email=[akun], Key_ID=Arunika-Gemini
+[ ] TEST key dengan curl:
+    curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=YOUR_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{"contents":[{"parts":[{"text":"Hello"}]}]}'
+
+API KEYS COMPLETE ✓
+[ ] Semua 3 keys di password manager dengan format aman
+[ ] Semua 3 keys di-test dan working
+[ ] Semua 3 keys di-log ke spreadsheet
+[ ] Budgets set untuk semua 3 services
+
+===============================================================================
+STEP 2: SETUP COWORK INSTANCES (2 JAM)
+===============================================================================
+
+INSTANCE 1: CENTRAL HUB
+[ ] Buka: https://cowork.anthropic.com
+[ ] Create/Login dengan email: ai-operations@arunika2045.com
+[ ] Klik: "+ New Instance"
+    - Nama: "Arunika-Central-Hub"
+    - Type: "Orchestration Hub"
+    - Region: "Asia Pacific (Singapore)" atau Indonesia jika tersedia
+[ ] Klik "Create"
+[ ] WAIT untuk instance initialize (~2-3 menit)
+[ ] Di instance settings:
+    [ ] Tambah Claude:
+        - API Key: [paste dari password manager]
+        - Model: Claude 3.5 Sonnet
+        - Role: "Primary Decision Maker"
+    [ ] Tambah Gemini:
+        - API Key: [paste dari password manager]
+        - Model: Gemini 2.0
+        - Role: "Document Processing"
+[ ] Klik "Test Connection"
+[ ] Verifikasi: Both Claude & Gemini menunjukkan "Connected ✓"
+[ ] Integrations:
+    [ ] Connect Google Drive (auth dengan AI Ops email)
+    [ ] Connect Gmail (same email)
+    [ ] Connect Google Sheets
+[ ] Log to spreadsheet: Instance=Central-Hub, Status=ACTIVE, Date=TODAY
+
+INSTANCE 2: SALES & MARKETING
+[ ] Create new email: direktur.marketing@arunika2045.com (jika belum ada)
+[ ] Buka: https://cowork.anthropic.com (buka tab baru/private window)
+[ ] Login dengan: direktur.marketing@arunika2045.com
+[ ] Klik: "+ New Instance"
+    - Nama: "Arunika-Sales-Marketing"
+    - Type: "Creative Automation"
+[ ] Di instance settings:
+    [ ] Tambah OpenAI:
+        - API Key: [paste dari password manager]
+        - Model: GPT-4o
+        - Role: "Content Generation"
+    [ ] Tambah Gemini:
+        - API Key: [sama seperti Central Hub]
+        - Role: "Image Processing"
+    [ ] Tambah Claude:
+        - API Key: [sama seperti Central Hub]
+        - Role: "Strategy & Analysis"
+[ ] Integrations:
+    [ ] Connect Gmail (direktur.marketing@arunika2045.com)
+    [ ] Connect Google Drive
+    [ ] Connect Google Sheets
+    [ ] Connect LinkedIn (OAuth)
+    [ ] Connect Instagram (jika ada API token)
+[ ] Test: Klik "Test" untuk setiap model
+[ ] Log to spreadsheet: Instance=Sales-Marketing, Status=ACTIVE
+
+INSTANCE 3: FINANCE & OPERATIONS
+[ ] Create new email: direktur.finance@arunika2045.com (jika belum ada)
+[ ] Buka: https://cowork.anthropic.com (buka tab baru/private window)
+[ ] Login dengan: direktur.finance@arunika2045.com
+[ ] Klik: "+ New Instance"
+    - Nama: "Arunika-Finance-Operations"
+    - Type: "Document & Process Automation"
+[ ] Di instance settings:
+    [ ] Tambah Gemini (PRIMARY):
+        - API Key: [paste dari password manager]
+        - Model: Gemini 2.0 Vision
+        - Role: "Document Processing"
+    [ ] Tambah Claude:
+        - API Key: [paste dari password manager]
+        - Role: "Financial Decision Maker"
+[ ] Integrations:
+    [ ] Connect Gmail (direktur.finance@arunika2045.com)
+    [ ] Connect Google Drive (Finance folder)
+    [ ] Connect Google Sheets (multiple sheets)
+    [ ] Connect Bank API (jika available)
+[ ] Test: Klik "Test" untuk setiap model
+[ ] Log to spreadsheet: Instance=Finance-Operations, Status=ACTIVE
+
+COWORK INSTANCES COMPLETE ✓
+[ ] Central Hub: ACTIVE
+[ ] Sales & Marketing: ACTIVE
+[ ] Finance & Operations: ACTIVE
+[ ] Semua 3 instances ter-test dan working
+[ ] Semua integrations connected
+
+===============================================================================
+STEP 3: FIRST WORKFLOW TEST (1.5 JAM)
+===============================================================================
+
+TEST WORKFLOW 1: SAMPLE SOCIAL MEDIA POST GENERATION
+
+Instance: Sales & Marketing
+[ ] Buka Cowork Sales & Marketing instance
+[ ] Navigasi: "Workflows"
+[ ] Klik: "+ New Workflow"
+[ ] Konfig:
+    - Nama: "Test-Social-Media"
+    - Trigger: "Manual (Run Now)"
+[ ] Add steps:
+    Step 1: Get trending topic (Manual input untuk test)
+    Step 2: Claude analysis
+    Step 3: OpenAI generate content
+    Step 4: Review output
+[ ] Klik: "Test" atau "Run Now"
+[ ] WAIT untuk execution (should complete dalam 30-60 detik)
+[ ] Verifikasi:
+    [ ] Claude menghasilkan analisis trending topic
+    [ ] OpenAI menghasilkan 2-3 post ideas
+    [ ] Output format sesuai harapan
+[ ] Jika SUCCESS:
+    [ ] Workflow template OK untuk di-schedule nanti
+    [ ] Log: "First workflow test PASSED"
+[ ] Jika FAILED:
+    [ ] Check error logs: Workflows → [nama] → "View Logs"
+    [ ] Paling likely issue: API key format atau quota limit
+    [ ] Fix: Verify API key, check billing limit, retry
+
+TEST WORKFLOW 2: SAMPLE INVOICE PROCESSING
+
+Instance: Finance & Operations
+[ ] Buka Cowork Finance & Operations instance
+[ ] Navigasi: "Workflows"
+[ ] Klik: "+ New Workflow"
+[ ] Konfig:
+    - Nama: "Test-Invoice-Processing"
+    - Trigger: "Email received with attachment"
+[ ] Add steps:
+    Step 1: Download attachment
+    Step 2: Gemini OCR extraction
+    Step 3: Claude validation
+    Step 4: Output to Google Sheets
+[ ] Test dengan: Upload sample invoice PDF ke test email
+[ ] WAIT untuk processing (1-2 menit)
+[ ] Verifikasi:
+    [ ] Gemini extracted semua fields (vendor, amount, date, items)
+    [ ] Claude validated dengan approval/flag
+    [ ] Data appeared di Google Sheets
+[ ] Jika SUCCESS:
+    [ ] Workflow template OK untuk production
+    [ ] Log: "Invoice workflow test PASSED"
+[ ] Jika FAILED:
+    [ ] Most likely: Email trigger not connected properly
+    [ ] Check: Gmail integration in Cowork settings
+    [ ] Test again dengan forward dari real email
+
+WORKFLOWS TESTED ✓
+[ ] Social Media workflow: PASSED
+[ ] Invoice workflow: PASSED
+[ ] Ready untuk production deployment
+
+===============================================================================
+STEP 4: DIRECTOR TRAINING & HANDOFF (1 JAM)
+===============================================================================
+
+KOMUNIKASI KE SETIAP DIREKTUR
+[ ] Email subject: "Your Cowork AI System is Ready - Login Credentials"
+[ ] Email content untuk setiap Direktur:
+
+    Direktur Penjualan & Marketing:
+    - Email login: direktur.marketing@arunika2045.com
+    - Password: [dari password manager yang sudah di-set]
+    - Instance name: "Arunika-Sales-Marketing"
+    - Demo: Daily social media generation workflow
+    - Attachment: ARUNIKA_COWORK_HYBRID_SETUP_GUIDE.md
+
+    Direktur Operasional & Keuangan:
+    - Email login: direktur.finance@arunika2045.com
+    - Password: [dari password manager yang sudah di-set]
+    - Instance name: "Arunika-Finance-Operations"
+    - Demo: Invoice processing workflow
+    - Attachment: ARUNIKA_COWORK_HYBRID_SETUP_GUIDE.md
+
+    Direktur Utama:
+    - Email login: corsec@arunika2045.com
+    - Instance name: "Arunika-Central-Hub" (optional)
+    - Dashboard link untuk monitoring
+    - Monthly performance report starting next month
+
+[ ] Schedule 30-minute walkthrough meeting per Direktur
+[ ] Materi per meeting:
+    - 5 min: Overview sistem & benefits
+    - 10 min: Live demo (run sample workflow, show results)
+    - 10 min: How to use & daily tasks
+    - 5 min: Q&A & troubleshooting contact
+
+TRAINING COMPLETE ✓
+[ ] Setiap Direktur understand sistem mereka
+[ ] Setiap Direktur punya password & akses
+[ ] Setiap Direktur tahu siapa contact untuk issues
+
+===============================================================================
+STEP 5: DOCUMENTATION & MONITORING SETUP (30 MENIT)
+===============================================================================
+
+DOCUMENTATION
+[ ] Move files ke shared folder: P:\ArunikaTeknologiGlobal\Project\ArunikaAgentic\Arunika Agentic Ai\
+    [ ] ARUNIKA_COWORK_HYBRID_SETUP_GUIDE.md ✓ (sudah ada)
+    [ ] ARUNIKA_WORKFLOW_SPECIFICATIONS.md ✓ (sudah ada)
+    [ ] QUICK_START_CHECKLIST.txt ✓ (ini file)
+[ ] Create shared access: Share link dengan semua Direktur
+[ ] Backup: Save semua documentation ke cloud backup
+
+MONITORING SETUP
+[ ] Setup Google Sheets untuk daily monitoring:
+    [ ] Column A: Date
+    [ ] Column B: Central Hub Status (ONLINE/OFFLINE)
+    [ ] Column C: Social Media Workflow (# posts generated)
+    [ ] Column D: Invoice Workflow (# invoices processed)
+    [ ] Column E: API Costs (daily total)
+    [ ] Column F: Errors or Issues
+    [ ] Column G: Notes
+[ ] Set reminder: Daily check-in 17:00 WIB untuk fill monitoring sheet
+[ ] Set alert: Email to IT Manager jika API cost > daily budget
+
+SETUP COMPLETE ✓
+[ ] Documentation centralized
+[ ] Monitoring dashboard ready
+[ ] Daily check-in process established
+
+===============================================================================
+END OF DAY 1 - WHAT SHOULD BE DONE
+===============================================================================
+
+✓ API Keys Created (3): Claude, OpenAI, Gemini
+✓ Cowork Instances Active (3): Central Hub, Sales & Marketing, Finance & Operations
+✓ Workflows Tested (2): Social Media, Invoice Processing
+✓ Team Trained (3): Direktur Marketing, Finance, Utama
+✓ Documentation Ready (3): Setup Guide, Workflow Specs, Quick Start
+✓ Monitoring Dashboard: Active
+
+NEXT STEPS (WEEK 2-3):
+[ ] Schedule workflows untuk auto-run (Social Media = daily 9 AM, Invoice = continuous)
+[ ] Run first real workflow executions (small test data set)
+[ ] Monitor results & accuracy
+[ ] Make adjustments sebagai diperlukan
+[ ] Scale up ke 100% production mode
+
+CONTACT NUMBERS:
+- IT Manager: [TO BE FILLED]
+- AI Operations Manager: [TO BE FILLED]
+- Antropic Support: support@anthropic.com
+- OpenAI Support: support@openai.com
+- Google Cloud Support: support@google.com/cloud
+
+===============================================================================
+CRITICAL SECURITY REMINDERS
+===============================================================================
+
+DO:
+✓ Keep API keys dalam password manager terenkripsi
+✓ Rotate API keys setiap 3 bulan
+✓ Monitor API costs daily
+✓ Log semua akses & changes
+
+DON'T:
+✗ Share API keys via email atau chat
+✗ Commit API keys ke GitHub
+✗ Simpan di plain text file
+✗ Use same key untuk multiple instances
+
+IF API KEY LEAKED:
+1. IMMEDIATELY revoke di service console
+2. Create new key
+3. Update di Cowork instances
+4. Alert Direktur Utama
+5. Document incident
+
+===============================================================================
+SUCCESS = Cowork Hybrid Active & Team Ready!
+===============================================================================
+
+Document Version: 1.0
+Created: 2026-05-08
+For: PT. Arunika Teknologi Global
+
+Questions? Refer to:
+- ARUNIKA_COWORK_HYBRID_SETUP_GUIDE.md (detailed)
+- ARUNIKA_WORKFLOW_SPECIFICATIONS.md (workflow details)
+- Support contacts (above)

@@ -1,0 +1,23 @@
+# Google Drive Shared Drive ID
+#
+# This file should contain the ID of the "Arunika-Central-Hub" shared drive
+# Format: 0A...
+#
+# To get the ID:
+# 1. Create the shared drive at: https://drive.google.com/drive/u/0/shared-drives
+# 2. Name it: Arunika-Central-Hub
+# 3. Share it with: arunika-central-hub-api@arunika-central-hub.iam.gserviceaccount.com (Editor role)
+# 4. Copy the ID from the URL and paste it below
+#
+# Placeholder - awaiting manual creation and ID entry
+DRIVE_ID=PENDING_MANUAL_CREATION
+
+# Service Account Email
+SERVICE_ACCOUNT=arunika-central-hub-api@arunika-central-hub.iam.gserviceaccount.com
+
+# Shared Drive Name
+DRIVE_NAME=Arunika-Central-Hub
+
+# Status
+STATUS=AWAITING_MANUAL_SETUP
+CREATION_GUIDE=/config/shared-drive-setup-guide.md
