@@ -29,11 +29,16 @@ interface Task {
 
 interface Message {
   id: string;
-  from: string;
+  from_division_id: string;
+  to_division_id: string;
+  from_division_name?: string;
   subject: string;
-  date: string;
-  isUnread: boolean;
-  preview: string;
+  body: string;
+  message_type: string;
+  is_read: boolean;
+  priority: string;
+  created_at: string;
+  read_at?: string;
 }
 
 interface Report {
@@ -187,31 +192,114 @@ const TasksView: React.FC<{ division: string; loading?: boolean }> = ({ division
   );
 };
 
+/** Helper: badge warna berdasarkan message_type */
+function getMessageTypeBadge(type: string) {
+  switch (type) {
+    case 'approval-response':
+      return null; // handled separately via subject prefix
+    case 'approval-request':
+      return { label: 'Permintaan Approval', bg: 'bg-yellow-100', text: 'text-yellow-800' };
+    case 'task-notification':
+      return { label: 'Notifikasi Tugas', bg: 'bg-blue-100', text: 'text-blue-800' };
+    case 'system-alert':
+      return { label: 'System Alert', bg: 'bg-red-100', text: 'text-red-800' };
+    default:
+      return { label: 'Pesan', bg: 'bg-gray-100', text: 'text-gray-700' };
+  }
+}
+
+/** Helper: deteksi status dari subject notifikasi approval */
+function detectApprovalStatus(subject: string): 'approved' | 'rejected' | 'revision' | null {
+  if (subject.includes('DISETUJUI')) return 'approved';
+  if (subject.includes('DITOLAK')) return 'rejected';
+  if (subject.includes('PERLU REVISI')) return 'revision';
+  return null;
+}
+
+function ApprovalResponseBadge({ subject }: { subject: string }) {
+  const status = detectApprovalStatus(subject);
+  if (!status) return null;
+  const map = {
+    approved: { label: '✅ Disetujui', bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
+    rejected: { label: '❌ Ditolak', bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
+    revision: { label: '🔄 Perlu Revisi', bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
+  };
+  const s = map[status];
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${s.bg} ${s.text} ${s.border}`}>
+      {s.label}
+    </span>
+  );
+}
+
 const MailboxView: React.FC<{ division: string; loading?: boolean }> = ({ division, loading = false }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>('all');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const fetchMessages = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const url = new URL(`/api/divisions/${encodeURIComponent(division)}/messages`, window.location.origin);
+      url.searchParams.set('limit', '30');
+      if (filter === 'unread') url.searchParams.set('unread_only', 'true');
+      if (filter === 'approval-response') url.searchParams.set('message_type', 'approval-response');
+      if (filter === 'approval-request') url.searchParams.set('message_type', 'approval-request');
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      const data = await response.json();
+      setMessages(data.data || []);
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await fetch(`/api/divisions/${encodeURIComponent(division)}/messages?limit=20`);
-        if (!response.ok) throw new Error('Failed to fetch messages');
-        const data = await response.json();
-        setMessages(data.data || []);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    if (division) {
-      fetchMessages();
+    if (division) fetchMessages();
+  }, [division, filter]);
+
+  const markAsRead = async (msgId: string) => {
+    try {
+      await fetch(`/api/divisions/${encodeURIComponent(division)}/messages`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message_ids: [msgId] }),
+      });
+      setMessages((prev) => prev.map((m) => m.id === msgId ? { ...m, is_read: true } : m));
+    } catch (e) {
+      console.error('Mark read failed:', e);
     }
-  }, [division]);
+  };
+
+  const markAllRead = async () => {
+    try {
+      await fetch(`/api/divisions/${encodeURIComponent(division)}/messages`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      setMessages((prev) => prev.map((m) => ({ ...m, is_read: true })));
+    } catch (e) {
+      console.error('Mark all read failed:', e);
+    }
+  };
+
+  const unreadCount = messages.filter((m) => !m.is_read).length;
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleString('id-ID', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta',
+      });
+    } catch { return dateStr; }
+  };
 
   if (isLoading || loading) {
     return (
@@ -235,68 +323,152 @@ const MailboxView: React.FC<{ division: string; loading?: boolean }> = ({ divisi
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">{division} - Mailbox</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-gray-900">Mailbox</h2>
+          {unreadCount > 0 && (
+            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-500 text-white">
+              {unreadCount} belum dibaca
+            </span>
+          )}
+        </div>
         <div className="flex gap-2">
-          <select className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm">
-            <option>All Messages</option>
-            <option>From CEO</option>
-            <option>From Divisions</option>
-            <option>System Notifications</option>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm"
+          >
+            <option value="all">Semua Pesan</option>
+            <option value="unread">Belum Dibaca</option>
+            <option value="approval-response">Hasil Approval</option>
+            <option value="approval-request">Permintaan Approval</option>
           </select>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium">
-            Unread: 0
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllRead}
+              className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+            >
+              Tandai Semua Dibaca
+            </button>
+          )}
+          <button
+            onClick={() => fetchMessages()}
+            className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"
+          >
+            Refresh
           </button>
         </div>
       </div>
 
       {messages.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <p className="text-gray-500">No messages available for this division.</p>
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+          <Mail size={40} className="text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500 font-medium">Tidak ada pesan</p>
+          <p className="text-gray-400 text-sm mt-1">Mailbox kosong untuk filter yang dipilih.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${
-                msg.isUnread
-                  ? 'bg-indigo-50 border-indigo-200'
-                  : 'bg-white border-gray-200'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex gap-3 flex-1">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className={`font-semibold ${msg.isUnread ? 'text-indigo-900' : 'text-gray-900'}`}>
-                        {msg.from}
-                      </h4>
-                      {msg.isUnread && (
-                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+          {messages.map((msg) => {
+            const isExpanded = expandedId === msg.id;
+            const approvalStatus = msg.message_type === 'approval-response'
+              ? detectApprovalStatus(msg.subject)
+              : null;
+            const typeBadge = getMessageTypeBadge(msg.message_type);
+
+            // Border color for approval response
+            const cardBorder = approvalStatus === 'approved'
+              ? 'border-green-200'
+              : approvalStatus === 'rejected'
+              ? 'border-red-200'
+              : approvalStatus === 'revision'
+              ? 'border-orange-200'
+              : msg.is_read ? 'border-gray-200' : 'border-indigo-300';
+
+            const cardBg = !msg.is_read
+              ? 'bg-indigo-50'
+              : approvalStatus === 'approved'
+              ? 'bg-green-50'
+              : approvalStatus === 'rejected'
+              ? 'bg-red-50'
+              : approvalStatus === 'revision'
+              ? 'bg-orange-50'
+              : 'bg-white';
+
+            return (
+              <div
+                key={msg.id}
+                className={`rounded-lg border ${cardBorder} ${cardBg} transition-all hover:shadow-md`}
+              >
+                {/* Message header */}
+                <div
+                  className="p-4 cursor-pointer"
+                  onClick={() => {
+                    setExpandedId(isExpanded ? null : msg.id);
+                    if (!msg.is_read) markAsRead(msg.id);
+                  }}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        {!msg.is_read && (
+                          <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
+                        )}
+                        {msg.message_type === 'approval-response' ? (
+                          <ApprovalResponseBadge subject={msg.subject} />
+                        ) : typeBadge ? (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${typeBadge.bg} ${typeBadge.text}`}>
+                            {typeBadge.label}
+                          </span>
+                        ) : null}
+                        {msg.priority === 'high' && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                            Prioritas Tinggi
+                          </span>
+                        )}
+                      </div>
+                      <h3 className={`text-sm font-semibold ${!msg.is_read ? 'text-indigo-900' : 'text-gray-900'} truncate`}>
+                        {msg.subject}
+                      </h3>
+                      {!isExpanded && (
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">
+                          {msg.body?.split('\n')[0]}
+                        </p>
                       )}
                     </div>
-                    <h3 className={`text-sm ${msg.isUnread ? 'font-semibold text-indigo-900' : 'text-gray-700'}`}>
-                      {msg.subject}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">{msg.preview}</p>
+                    <span className="text-xs text-gray-400 ml-4 flex-shrink-0">
+                      {formatDate(msg.created_at)}
+                    </span>
                   </div>
                 </div>
-                <span className="text-xs text-gray-500 ml-4">{msg.date}</span>
+
+                {/* Expanded body */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 border-t border-gray-100 mt-0">
+                    <pre className="mt-3 text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
+                      {msg.body}
+                    </pre>
+                    <div className="flex gap-2 mt-3">
+                      {!msg.is_read && (
+                        <button
+                          onClick={() => markAsRead(msg.id)}
+                          className="px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                        >
+                          ✓ Tandai Dibaca
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setExpandedId(null)}
+                        className="px-3 py-1.5 text-xs bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 font-medium"
+                      >
+                        Tutup
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">
-                  View
-                </button>
-                <button className="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">
-                  Reply
-                </button>
-                <button className="px-3 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50">
-                  Mark as Read
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

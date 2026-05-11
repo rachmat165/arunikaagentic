@@ -1,10 +1,70 @@
 /**
  * PATCH /api/divisions/[divisionId]/approvals/[approvalId]
  * CEO atau Division Head melakukan Approve / Reject / Request Revision
+ * Setelah keputusan dibuat, notifikasi otomatis dikirim ke mailbox divisi pengaju.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/database';
 import { resolveDivisionId } from '@/lib/division-resolver';
+
+const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+/** Buat pesan notifikasi ke mailbox divisi pengaju */
+async function sendApprovalNotification(
+  approvalRecord: any,
+  newStatus: string,
+  notes: string | null,
+  approverDivisionId: string
+) {
+  const { from_division_id, title, request_type } = approvalRecord;
+
+  const labelMap: Record<string, string> = {
+    approved: '✅ DISETUJUI',
+    rejected: '❌ DITOLAK',
+    'revision-needed': '🔄 PERLU REVISI',
+  };
+  const priorityMap: Record<string, string> = {
+    approved: 'normal',
+    rejected: 'high',
+    'revision-needed': 'high',
+  };
+  const actionMap: Record<string, string> = {
+    approved: 'Anda dapat segera melanjutkan eksekusi rencana yang telah disetujui.',
+    rejected:
+      'Permohonan Anda ditolak. Tinjau kembali proposal dan ajukan ulang dengan penyesuaian yang diperlukan.',
+    'revision-needed':
+      'Permohonan Anda memerlukan revisi sebelum dapat disetujui. Silakan perbaiki sesuai catatan dan ajukan kembali.',
+  };
+
+  const label = labelMap[newStatus] ?? newStatus.toUpperCase();
+  const subject = `[${label}] ${title || request_type || 'Permohonan Approval'}`;
+  const body = [
+    `Status permohonan Anda telah diperbarui oleh CEO / Division Head.`,
+    ``,
+    `Status   : ${label}`,
+    `Judul    : ${title || request_type || '-'}`,
+    `Tanggal  : ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`,
+    notes ? `Catatan  : ${notes}` : null,
+    ``,
+    actionMap[newStatus],
+  ]
+    .filter((line) => line !== null)
+    .join('\n');
+
+  await query(
+    `INSERT INTO messages
+       (from_division_id, to_division_id, sender_id, subject, body, message_type, is_read, priority)
+     VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, 'approval-response', false, $6)`,
+    [
+      approverDivisionId,  // CEO / division penyetuju sebagai pengirim
+      from_division_id,    // divisi pengaju sebagai penerima
+      SYSTEM_USER_ID,
+      subject,
+      body,
+      priorityMap[newStatus] ?? 'normal',
+    ]
+  );
+}
 
 export async function PATCH(
   request: NextRequest,
@@ -20,7 +80,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { action, notes, approved_by } = body;
+    const { action, notes } = body;
 
     if (!action || !['approve', 'reject', 'revision'].includes(action)) {
       return NextResponse.json(
@@ -31,7 +91,13 @@ export async function PATCH(
 
     // Verify the approval belongs to this division
     const existing = await query(
-      `SELECT * FROM approvals WHERE id = $1 AND to_division_id = $2`,
+      `SELECT a.*,
+              fd.name as from_division_name,
+              td.name as to_division_name
+       FROM approvals a
+       LEFT JOIN divisions fd ON fd.id = a.from_division_id
+       LEFT JOIN divisions td ON td.id = a.to_division_id
+       WHERE a.id = $1::uuid AND a.to_division_id = $2::uuid`,
       [params.approvalId, divisionUUID]
     );
 
@@ -91,7 +157,7 @@ export async function PATCH(
       [newStatus, notes || null, params.approvalId]
     );
 
-    // If approved, also update the related task status if linked
+    // Jika approved, update status task terkait jika ada
     if (newStatus === 'approved' && currentApproval.request_id) {
       await query(
         `UPDATE tasks SET status = 'completed', updated_at = NOW()
@@ -100,10 +166,22 @@ export async function PATCH(
       ).catch(() => { /* ignore if request_id is not a task UUID */ });
     }
 
+    // Kirim notifikasi ke mailbox divisi pengaju
+    await sendApprovalNotification(
+      currentApproval,
+      newStatus,
+      notes || null,
+      divisionUUID
+    ).catch((err) => {
+      console.error('[approval notify] Failed to send notification message:', err?.message);
+      // Non-fatal: jangan gagalkan response utama
+    });
+
     return NextResponse.json({
       success: true,
       data: result.rows[0],
       message: `Approval ${newStatus} successfully`,
+      notification_sent: true,
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -132,7 +210,7 @@ export async function GET(
        FROM approvals a
        LEFT JOIN divisions fd ON fd.id = a.from_division_id
        LEFT JOIN divisions td ON td.id = a.to_division_id
-       WHERE a.id = $1 AND a.to_division_id = $2`,
+       WHERE a.id = $1::uuid AND a.to_division_id = $2::uuid`,
       [params.approvalId, divisionUUID]
     );
 

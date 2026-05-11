@@ -82,3 +82,59 @@ export async function GET(
     });
   }
 }
+
+/**
+ * PATCH /api/divisions/[divisionId]/messages
+ * Mark messages as read.
+ * Body: { message_ids: string[] }  — atau kosong untuk mark all as read
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { divisionId: string } }
+) {
+  try {
+    const divisionUUID = await resolveDivisionId(params.divisionId);
+    if (!divisionUUID) {
+      return NextResponse.json({ success: false, error: 'Division not found' }, { status: 404 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const messageIds: string[] = body?.message_ids ?? [];
+
+    let result;
+    if (messageIds.length > 0) {
+      // Mark specific messages as read
+      result = await query(
+        `UPDATE messages
+         SET is_read = true, read_at = NOW(), updated_at = NOW()
+         WHERE to_division_id = $1::uuid
+           AND id = ANY($2::uuid[])
+           AND is_read = false
+         RETURNING id`,
+        [divisionUUID, messageIds]
+      );
+    } else {
+      // Mark all unread messages for this division as read
+      result = await query(
+        `UPDATE messages
+         SET is_read = true, read_at = NOW(), updated_at = NOW()
+         WHERE to_division_id = $1::uuid AND is_read = false
+         RETURNING id`,
+        [divisionUUID]
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      updated: result.rows.length,
+      message: `${result.rows.length} pesan ditandai sudah dibaca`,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Error marking messages as read:', error);
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to update messages' },
+      { status: 500 }
+    );
+  }
+}
