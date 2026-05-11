@@ -28,6 +28,9 @@ const AGENT_ROUTES = [
   '/api/approvals/revise',
   '/api/approvals/reject',
   '/api/approvals/approve-with-command',
+  '/api/approvals/submit',
+  '/api/approvals/status',
+  '/api/monitoring',
 ];
 
 export function middleware(request: NextRequest) {
@@ -69,9 +72,4 @@ export function middleware(request: NextRequest) {
   requestHeaders.set('x-agent-verified', 'true');
   requestHeaders.set('x-request-timestamp', new Date().toISOString());
 
-  return NextResponse.next({ request: { headers: requestHeaders } });
-}
-
-export const config = {
-  matcher: ['/api/approvals/:path*'],
-};
+  return NextResponse.next({ request: { headers: requestHeaders
