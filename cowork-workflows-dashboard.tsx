@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { DashboardCard } from './dashboard-card';
-import { AlertCircle, CheckCircle, Clock, PlayCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, PlayCircle, RefreshCw, GitBranch } from 'lucide-react';
 import { COWORK_INSTANCES, getAllWorkflows } from '@/services/cowork-api';
+import { ApprovalWorkflowDashboard } from './approval-workflow-dashboard';
 
 interface WorkflowStats {
   totalExecutions: number;
@@ -30,6 +31,7 @@ export function CoworkWorkflowsDashboard() {
   const [loading, setLoading] = useState(false);
   const [executing, setExecuting] = useState<string | null>(null);
   const [stats, setStats] = useState<Record<string, WorkflowStats>>({});
+  const [mainTab, setMainTab] = useState<'workflows' | 'approval-system'>('workflows');
 
   // Fetch workflows
   useEffect(() => {
@@ -150,6 +152,40 @@ export function CoworkWorkflowsDashboard() {
         </div>
       </div>
 
+      {/* ── MAIN TAB SWITCHER ── */}
+      <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit">
+        <button
+          onClick={() => setMainTab('workflows')}
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+            mainTab === 'workflows'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+          }`}
+        >
+          🤖 Workflows Dashboard
+        </button>
+        <button
+          onClick={() => setMainTab('approval-system')}
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+            mainTab === 'approval-system'
+              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+          }`}
+        >
+          <GitBranch size={15} />
+          Approval Workflow System
+          <span className="bg-indigo-500 text-white text-xs px-1.5 py-0.5 rounded-full">7 Phases</span>
+        </button>
+      </div>
+
+      {/* ── APPROVAL WORKFLOW SYSTEM TAB ── */}
+      {mainTab === 'approval-system' && (
+        <ApprovalWorkflowDashboard />
+      )}
+
+      {/* ── WORKFLOWS TAB ── */}
+      {mainTab !== 'approval-system' && (<>
+
       {/* Instance Filter */}
       <div className="flex gap-2 flex-wrap">
         <button
@@ -257,40 +293,4 @@ export function CoworkWorkflowsDashboard() {
             <p>Loading workflows...</p>
           </div>
         )}
-      </div>
-
-      {/* Summary Stats */}
-      <DashboardCard title="Overall Performance">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{workflows.length}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Total Workflows</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {Object.values(stats).reduce((sum, s) => sum + s.successCount, 0)}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Successful</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">
-              {Object.values(stats).reduce((sum, s) => sum + s.failureCount, 0)}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Failed</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {(
-                (Object.values(stats).reduce((sum, s) => sum + s.successCount, 0) /
-                  (Object.values(stats).reduce((sum, s) => sum + s.totalExecutions, 0) || 1)) *
-                100
-              ).toFixed(1)}
-              %
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Success Rate</div>
-          </div>
-        </div>
-      </DashboardCard>
-    </div>
-  );
-}
+      </
