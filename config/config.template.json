@@ -1,0 +1,20 @@
+{
+  "gcp": {
+    "projectId": "your-gcp-project-id",
+    "serviceAccountEmail": "your-service-account@project.iam.gserviceaccount.com"
+  },
+  "apis": {
+    "anthropic": {
+      "apiKey": "your-anthropic-api-key"
+    },
+    "openai": {
+      "apiKey": "your-openai-api-key"
+    }
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "arunika_agentic",
+    "user": "postgres"
+  }
+}
