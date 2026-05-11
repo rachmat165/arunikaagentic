@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "setup:encrypt-keys": "ts-node scripts/setup-encrypt-keys.ts",
-    "generate:encryption-key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+    "setup:encrypt-keys": "ts-node --project tsconfig.scripts.json -r tsconfig-paths/register scripts/setup-encrypt-keys.ts",
+    "generate:encryption-key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    "db:migrate": "ts-node --project tsconfig.scripts.json -r tsconfig-paths/register scripts/run-migrations.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",
@@ -20,4 +21,21 @@
     "next": "^14.0.0",
     "next-themes": "^0.2.1",
     "openai": "^4.77.0",
-    "pg":
+    "pg": "^8.20.0",
+    "postcss": "^8.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.3.0",
+    "three": ">=0.150.0",
+    "zustand": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.11.0",
+    "@types/react": "^18.2.0",
+    "@types/three": ">=0.150.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.0.0"
+  }
+}
