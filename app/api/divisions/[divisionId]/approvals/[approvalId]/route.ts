@@ -58,18 +58,37 @@ export async function PATCH(
 
     const newStatus = statusMap[action];
 
-    // Update approval record (use actual column names from DB schema)
+    // Fix audit trigger jika masih bermasalah (safe to run multiple times)
+    await query(`
+      CREATE OR REPLACE FUNCTION log_changes()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        IF TG_OP = 'DELETE' THEN
+          INSERT INTO audit_log (entity_type, entity_id, action, old_value, performed_by)
+          VALUES (TG_TABLE_NAME, OLD.id::text, 'DELETE', row_to_json(OLD), OLD.updated_by);
+        ELSIF TG_OP = 'UPDATE' THEN
+          INSERT INTO audit_log (entity_type, entity_id, action, old_value, new_value, performed_by)
+          VALUES (TG_TABLE_NAME, NEW.id::text, 'UPDATE', row_to_json(OLD), row_to_json(NEW), NEW.updated_by);
+        ELSIF TG_OP = 'INSERT' THEN
+          INSERT INTO audit_log (entity_type, entity_id, action, new_value, performed_by)
+          VALUES (TG_TABLE_NAME, NEW.id::text, 'INSERT', row_to_json(NEW), NEW.created_by);
+        END IF;
+        RETURN NULL;
+      END;
+      $$ LANGUAGE plpgsql;
+    `).catch(() => { /* ignore if trigger fix fails, non-critical */ });
+
+    // Update approval record
     const result = await query(
       `UPDATE approvals
-       SET status = $1,
-           approver_notes = COALESCE($2, approver_notes),
-           approver_id = COALESCE($3::uuid, approver_id),
-           approved_at = CASE WHEN $1 = 'approved' THEN NOW() ELSE approved_at END,
-           rejected_at = CASE WHEN $1 = 'rejected' THEN NOW() ELSE rejected_at END,
+       SET status = $1::varchar,
+           approver_notes = COALESCE($2::text, approver_notes),
+           approved_at = CASE WHEN $1::text = 'approved' THEN NOW() ELSE approved_at END,
+           rejected_at = CASE WHEN $1::text = 'rejected' THEN NOW() ELSE rejected_at END,
            updated_at = NOW()
-       WHERE id = $4
+       WHERE id = $3::uuid
        RETURNING *`,
-      [newStatus, notes || null, null, params.approvalId]
+      [newStatus, notes || null, params.approvalId]
     );
 
     // If approved, also update the related task status if linked
@@ -87,10 +106,10 @@ export async function PATCH(
       message: `Approval ${newStatus} successfully`,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating approval:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to process approval action' },
+      { success: false, error: error?.message || 'Failed to process approval action' },
       { status: 500 }
     );
   }

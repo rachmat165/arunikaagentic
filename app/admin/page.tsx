@@ -12,6 +12,8 @@ export default function AdminSetupPage() {
   const [migrating, setMigrating] = useState(false)
   const [migrateResult, setMigrateResult] = useState<any>(null)
   const [migrateStatus, setMigrateStatus] = useState<any>(null)
+  const [realSeeding, setRealSeeding] = useState(false)
+  const [realSeedResult, setRealSeedResult] = useState<any>(null)
 
   const checkDB = async () => {
     setChecking(true)
@@ -72,6 +74,25 @@ export default function AdminSetupPage() {
       setMigrateResult({ success: false, error: 'Gagal menghubungi server' })
     } finally {
       setMigrating(false)
+    }
+  }
+
+  const runRealSeed = async () => {
+    if (!confirm('⚠️ Ini akan MENGHAPUS SEMUA data yang ada dan menggantinya dengan data real dari Cowork Scheduled Tasks 11 Mei 2026. Lanjutkan?')) return
+    setRealSeeding(true)
+    setRealSeedResult(null)
+    try {
+      const res = await fetch('/api/admin/real-seed', { method: 'POST' })
+      const data = await res.json()
+      setRealSeedResult(data)
+      if (data.success) {
+        setDbStatus({ success: true, migrated: true, counts: data.counts })
+        setMigrateStatus({ success: true, migrated: true, tablesFound: 5 })
+      }
+    } catch (e) {
+      setRealSeedResult({ success: false, error: 'Gagal menghubungi server' })
+    } finally {
+      setRealSeeding(false)
     }
   }
 
@@ -351,6 +372,75 @@ set PGPASSWORD=postgres
                       ))}
                     </ul>
                   )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Step 4: Real Data dari Cowork Scheduled Tasks */}
+        <div className={`bg-white rounded-xl border p-6 mt-6 shadow-sm ${!isMigrated ? 'opacity-60 pointer-events-none' : 'border-orange-200'}`}>
+          <h2 className="font-semibold text-gray-800 mb-1">🔄 Step 4 — Ganti dengan Data Real (Hari Ini)</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Hapus semua data mock/dummy dan isi ulang dengan data real dari Cowork Scheduled Tasks hari ini
+            (Foundation Prospecting, GCP Blocker, Daily Reports — 11 Mei 2026).
+          </p>
+
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4 text-sm text-orange-800">
+            ⚠️ <strong>Peringatan:</strong> Tindakan ini akan <strong>menghapus semua data yang ada</strong> (tasks, approvals, messages, reports)
+            dan menggantinya dengan data real dari scheduled tasks hari ini. Tidak bisa di-undo.
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-3 mb-5 text-xs text-gray-600 space-y-1">
+            <p className="font-semibold text-gray-700 mb-2">Data real yang akan diinsert:</p>
+            <p>📋 <strong>16 Tasks</strong> — CEO (5), Sales & Marketing (7), Ops & Finance (4)</p>
+            <p>✅ <strong>5 Approvals</strong> — Foundation prospect selection, outreach, GCP eskalasi, travel budget</p>
+            <p>💬 <strong>7 Messages</strong> — Daily reports, eskalasi GCP, arahan CEO</p>
+            <p>📊 <strong>6 Reports</strong> — Foundation prospecting, status project, finance token report</p>
+            <p className="mt-2 text-indigo-600 font-medium">Sumber: daily-sales-marketing-prospecting + daily-ceo-review + daily-finance-token-report + daily-product-erp-review</p>
+          </div>
+
+          <button
+            onClick={runRealSeed}
+            disabled={realSeeding || !isMigrated}
+            className={`w-full py-3 rounded-xl font-bold text-base transition-all ${
+              realSeeding
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-orange-500 text-white hover:bg-orange-600'
+            }`}
+          >
+            {realSeeding ? '⏳ Menghapus mock data & insert data real...' : '🔄 Reset & Insert Data Real Hari Ini'}
+          </button>
+
+          {realSeedResult && (
+            <div className={`mt-4 rounded-lg p-4 ${realSeedResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+              {realSeedResult.success ? (
+                <>
+                  <p className="font-bold text-green-700 mb-3">{realSeedResult.message}</p>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {Object.entries(realSeedResult.counts || {}).map(([key, val]) => (
+                      <div key={key} className="bg-white rounded p-2 border border-green-100 text-center">
+                        <p className="text-xs text-gray-500">{key}</p>
+                        <p className="font-bold text-orange-600 text-lg">{val as string}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <ul className="space-y-1">
+                    {(realSeedResult.results || []).map((r: string, i: number) => (
+                      <li key={i} className="text-sm text-green-700">{r}</li>
+                    ))}
+                  </ul>
+                  <div className="mt-3 p-3 bg-white rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800 font-medium">🎉 Data real sudah aktif!</p>
+                    <p className="text-sm text-green-700 mt-1">
+                      Buka <a href="/" className="underline font-medium">Dashboard</a> → CEO Office → Approval Center
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <p className="font-bold text-red-700 mb-2">❌ Gagal:</p>
+                  <p className="text-sm text-red-600 font-mono">{realSeedResult.error}</p>
                 </div>
               )}
             </div>
