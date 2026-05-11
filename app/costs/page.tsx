@@ -30,30 +30,30 @@ export default function CostsPage() {
         const executionCount = data.totalExecutions || 0
 
         // Allocate budget proportionally
-        const costData = [
+        const costData: CostData[] = [
           {
             category: 'Claude API Calls',
             amount: parseFloat((monthlyBudget * 0.55).toFixed(2)),
             percentage: 55,
-            trend: executionCount > 0 ? 'up' : 'stable' as const,
+            trend: executionCount > 0 ? 'up' : 'stable',
           },
           {
             category: 'Infrastructure (GCP)',
             amount: parseFloat((monthlyBudget * 0.30).toFixed(2)),
             percentage: 30,
-            trend: 'stable' as const,
+            trend: 'stable',
           },
           {
             category: 'Storage & Database',
             amount: parseFloat((monthlyBudget * 0.10).toFixed(2)),
             percentage: 10,
-            trend: 'down' as const,
+            trend: 'down',
           },
           {
             category: 'Monitoring & Logging',
             amount: parseFloat((monthlyBudget * 0.05).toFixed(2)),
             percentage: 5,
-            trend: 'stable' as const,
+            trend: 'stable',
           },
         ]
 

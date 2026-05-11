@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { DashboardCard } from '@/components/dashboard-card'
 import { KPICard } from '@/components/kpi-card'
-import { Activity, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 
 interface Agent {
   id: string
@@ -188,7 +188,7 @@ export default function AgentsPage() {
           </select>
         </div>
 
-        <DashboardCard>
+        <DashboardCard title="Agent Status">
           <div className="grid grid-cols-1 gap-4">
             {sortedAgents.map((agent) => (
               <div

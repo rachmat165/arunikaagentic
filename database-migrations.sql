@@ -323,9 +323,9 @@ CREATE TRIGGER audit_approvals AFTER INSERT OR UPDATE OR DELETE ON approvals
 -- ============================================
 INSERT INTO divisions (name, slug, description, icon, status, sort_order)
 VALUES
-  ('CEO Office', 'ceo-office', 'Executive leadership and strategic decision-making', '👔', 'active', 1),
-  ('Sales & Marketing Division', 'sales-marketing', 'Revenue generation and brand awareness', '💼', 'active', 2),
-  ('Operations & Finance Division', 'ops-finance', 'Financial management and operational efficiency', '🏢', 'active', 3)
+  ('CEO Office', 'ceo-office', 'Executive leadership and strategic decision-making', 'CEO', 'active', 1),
+  ('Sales & Marketing Division', 'sales-marketing', 'Revenue generation and brand awareness', 'SALES', 'active', 2),
+  ('Operations & Finance Division', 'ops-finance', 'Financial management and operational efficiency', 'OPS', 'active', 3)
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================

@@ -816,7 +816,7 @@ const ApprovalCenterView: React.FC<{ division: string; loading?: boolean }> = ({
                       {approval.status === 'pending' ? '⏳ MENUNGGU APPROVAL' :
                        approval.status === 'approved' ? '✅ DISETUJUI' :
                        approval.status === 'rejected' ? '❌ DITOLAK' :
-                       approval.status?.toUpperCase()}
+                       'UNKNOWN'}
                     </span>
                     {reqType && (
                       <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">

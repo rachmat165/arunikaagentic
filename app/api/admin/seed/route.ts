@@ -5,10 +5,10 @@
  * atau klik tombol seed di halaman admin.
  * HANYA untuk environment development.
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { query } from '@/lib/database';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ success: false, error: 'Seed tidak diizinkan di production' }, { status: 403 });
   }

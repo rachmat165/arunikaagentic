@@ -32,16 +32,6 @@ export default function AdminSetupPage() {
     }
   }
 
-  const checkMigration = async () => {
-    try {
-      const res = await fetch('/api/admin/migrate')
-      const data = await res.json()
-      setMigrateStatus(data)
-    } catch (e) {
-      setMigrateStatus({ success: false, migrated: false })
-    }
-  }
-
   const tryStartPg = async () => {
     setPgStarting(true)
     setPgResult(null)

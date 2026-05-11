@@ -61,7 +61,7 @@ export default function SettingsPage() {
       )}
 
       {/* Profile Settings */}
-      <DashboardCard title={`👤 Profile Settings`} icon={<User className="w-5 h-5" />}>
+      <DashboardCard title={`👤 Profile Settings`}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -116,7 +116,7 @@ export default function SettingsPage() {
       </DashboardCard>
 
       {/* Notification Settings */}
-      <DashboardCard title={`🔔 Notification Settings`} icon={<Bell className="w-5 h-5" />}>
+      <DashboardCard title={`🔔 Notification Settings`}>
         <div className="space-y-4">
           {[
             { key: 'emailNotifications', label: 'Email Notifications', description: 'Receive updates via email' },
@@ -144,7 +144,7 @@ export default function SettingsPage() {
       </DashboardCard>
 
       {/* Security Settings */}
-      <DashboardCard title={`🔒 Security Settings`} icon={<Lock className="w-5 h-5" />}>
+      <DashboardCard title={`🔒 Security Settings`}>
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-800 rounded-lg">
             <div>
@@ -189,7 +189,7 @@ export default function SettingsPage() {
       </DashboardCard>
 
       {/* Data Management */}
-      <DashboardCard title={`💾 Data Management`} icon={<Database className="w-5 h-5" />}>
+      <DashboardCard title={`💾 Data Management`}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

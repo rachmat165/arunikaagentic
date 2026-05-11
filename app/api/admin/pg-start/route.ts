@@ -10,16 +10,6 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// Nama service PostgreSQL yang umum di Windows
-const PG_SERVICE_NAMES = [
-  'postgresql-x64-17',
-  'postgresql-x64-16',
-  'postgresql-x64-15',
-  'postgresql-x64-14',
-  'postgresql-x64-13',
-  'PostgreSQL',
-  'postgres',
-];
 
 export async function GET() {
   const os = require('os');
@@ -176,7 +166,6 @@ export async function POST() {
 
   // ─── Step 1: Temukan service PostgreSQL via PowerShell ───────────────────
   let targetService: string | null = null;
-  let serviceStatus = '';
 
   try {
     const { stdout } = await execAsync(
@@ -199,7 +188,6 @@ export async function POST() {
       }
       if (stopped) {
         targetService = stopped.Name;
-        serviceStatus = 'stopped';
       }
     }
   } catch (e: any) {

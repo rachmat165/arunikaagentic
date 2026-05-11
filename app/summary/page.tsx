@@ -95,31 +95,31 @@ export default function SummaryPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
           title="Cowork Instances"
-          value={data?.totalAgents}
+          value={data?.totalAgents ?? 0}
           change="Real instances"
           icon="🤖"
           trend="up"
         />
         <KPICard
           title="Total Executions"
-          value={data?.activeTasks}
+          value={data?.activeTasks ?? 0}
           change="All time"
           icon="✅"
-          trend={data?.activeTasks ? 'up' : 'down'}
+          trend={(data?.activeTasks ?? 0) > 0 ? 'up' : 'down'}
         />
         <KPICard
           title="Monthly Budget"
-          value={`$${data?.totalCosts}`}
+          value={`$${(data?.totalCosts ?? 0).toFixed(0)}`}
           change="Infrastructure only"
           icon="💰"
           trend="down"
         />
         <KPICard
           title="Success Rate"
-          value={`${data?.successRate?.toFixed(1) || 0}%`}
+          value={`${(data?.successRate ?? 0).toFixed(1)}%`}
           change="Overall accuracy"
           icon="📈"
-          trend={data && data.successRate >= 95 ? 'up' : 'down'}
+          trend={(data?.successRate ?? 0) >= 95 ? 'up' : 'down'}
         />
       </div>
 

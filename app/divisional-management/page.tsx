@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { DivisionalContent } from '@/components/DivisionalContent';
+import React, { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { DivisionalContent } from '@/components/DivisionalContent'
 
 /**
  * Divisional Management Page
@@ -15,43 +15,50 @@ const divisionNames: Record<string, string> = {
   ceo: 'CEO Office',
   sales: 'Sales & Marketing',
   ops: 'Operations & Finance',
-};
+}
 
 const menuMap: Record<string, string> = {
   tasks: 'tasks',
   mailbox: 'mailbox',
   reports: 'reports',
   approvals: 'approvals',
-};
+}
 
-export default function DivisionalManagementPage() {
-  const searchParams = useSearchParams();
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [activeDivision, setActiveDivision] = useState<string>('CEO Office');
-  const [mounted, setMounted] = useState(false);
+function DivisionalManagementClient() {
+  const searchParams = useSearchParams()
+
+  const [activeMenu, setActiveMenu] = useState<string | null>('tasks')
+  const [activeDivision, setActiveDivision] = useState<string>('CEO Office')
 
   useEffect(() => {
-    setMounted(true);
-
     // Get division and menu from query parameters
-    const divParam = searchParams.get('div') || 'ceo';
-    const menuParam = searchParams.get('menu') || 'tasks';
+    const divParam = searchParams.get('div') || 'ceo'
+    const menuParam = searchParams.get('menu') || 'tasks'
 
     // Update division name
-    setActiveDivision(divisionNames[divParam] || 'CEO Office');
+    setActiveDivision(divisionNames[divParam] || 'CEO Office')
 
     // Update menu
-    setActiveMenu(menuMap[menuParam] || 'tasks');
-  }, [searchParams]);
-
-  if (!mounted) {
-    return null;
-  }
+    setActiveMenu(menuMap[menuParam] || 'tasks')
+  }, [searchParams])
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* MAIN CONTENT */}
       <DivisionalContent activeMenu={activeMenu} division={activeDivision} />
     </div>
-  );
+  )
+}
+
+export default function DivisionalManagementPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-gray-50">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500" />
+        </div>
+      }
+    >
+      <DivisionalManagementClient />
+    </Suspense>
+  )
 }

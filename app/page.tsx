@@ -137,14 +137,14 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
           title="Total Agents"
-          value={data?.totalAgents}
+          value={data?.totalAgents ?? 0}
           change="+5%"
           icon="🤖"
           trend="up"
         />
         <KPICard
           title="Active Tasks"
-          value={data?.activeTasks}
+          value={data?.activeTasks ?? 0}
           change="+12%"
           icon="✅"
           trend="up"
