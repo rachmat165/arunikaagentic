@@ -72,4 +72,9 @@ export function middleware(request: NextRequest) {
   requestHeaders.set('x-agent-verified', 'true');
   requestHeaders.set('x-request-timestamp', new Date().toISOString());
 
-  return NextResponse.next({ request: { headers: requestHeaders
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+export const config = {
+  matcher: ['/api/approvals/:path*'],
+};
