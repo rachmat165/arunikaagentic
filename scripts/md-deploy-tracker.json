@@ -1,0 +1,44 @@
+{
+  "CEO_ALUR_PERSETUJUAN_LENGKAP.md": {
+    "status": "pending",
+    "runs": 0,
+    "lastRun": null,
+    "lastResult": null
+  },
+  "CEO_PROMPT_OPERATIONS_AGENT.md": {
+    "status": "pending",
+    "runs": 0,
+    "lastRun": null,
+    "lastResult": null
+  },
+  "CEO_PROMPT_SALES_MARKETING_AGENT.md": {
+    "status": "pending",
+    "runs": 0,
+    "lastRun": null,
+    "lastResult": null
+  },
+  "CEO_PROMPT_FINANCE_AGENT.md": {
+    "status": "pending",
+    "runs": 0,
+    "lastRun": null,
+    "lastResult": null
+  },
+  "CEO_MASTER_AGENT_COMMAND_INDEX.md": {
+    "status": "pending",
+    "runs": 0,
+    "lastRun": null,
+    "lastResult": null
+  },
+  "ARUNIKA_WORKFLOW_SPECIFICATIONS.md": {
+    "status": "pending",
+    "runs": 0,
+    "lastRun": null,
+    "lastResult": null
+  },
+  "APPROVAL_WORKFLOW_COMPLETE_SYSTEM.md": {
+    "status": "pending",
+    "runs": 0,
+    "lastRun": null,
+    "lastResult": null
+  }
+}
